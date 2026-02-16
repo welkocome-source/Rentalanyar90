@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayStation Auto System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #000000;
+            background-image: 
+                linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
+                url('https://images.unsplash.com/photo-1605901309584-818e25960b8f?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .ps-font { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+
+        .btn-green-active {
+            background-color: #16a34a !important;
+            box-shadow: 0 0 20px #22c55e, inset 0 0 10px rgba(255,255,255,0.2);
+            border: 1px solid #86efac;
+            transform: scale(1.05);
+            color: white !important;
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(0, 100, 255, 0.1);
+        }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #22c55e;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative">
+
+    <!-- Tombol Admin -->
+    <button onclick="openAdminLogin()" class="absolute top-4 right-4 text-slate-500 hover:text-white transition z-10">
+        <i class="fa-solid fa-gear text-2xl"></i>
+    </button>
+
+    <div class="w-full max-w-md glass-panel rounded-3xl shadow-2xl overflow-hidden relative">
+        
+        <!-- Header -->
+        <div class="bg-black/60 p-8 text-center border-b border-slate-800 relative">
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-blue-600 shadow-[0_0_10px_#2563eb]"></div>
+            <h1 class="text-3xl font-black ps-font text-white mb-2 tracking-widest drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
+                PLAYSTATION
+            </h1>
+            <div class="flex items-center justify-center gap-2 text-green-400 text-xs font-bold uppercase tracking-wider">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Menyalakan PS Sistem Otomatis
+            </div>
+        </div>
+
+        <div class="p-6 space-y-5">
+            
+            <!-- Nama -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">
+                    Nama Perental
+                </label>
+                <div class="relative">
+                    <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-500"></i>
+                    <input type="text" id="renterName" placeholder="Masukan nama..." 
+                        class="w-full bg-slate-900/80 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                </div>
+            </div>
+
+            <!-- Jam -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">
+                    Pilih Durasi (Jam)
+                </label>
+                <div class="grid grid-cols-4 gap-2" id="hourGrid">
+                    <!-- JS populated buttons -->
+                </div>
+            </div>
+
+            <!-- Pilihan Karo Kopi (Hidden Default) -->
+            <div id="coffeeSection" class="hidden fade-in">
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-mug-hot text-orange-400"></i> Karo Kopi?
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer relative group">
+                        <input type="radio" name="coffeeOption" value="Ya" class="peer sr-only" onchange="updateSummary()">
+                        <div class="h-10 rounded-lg border border-slate-700 bg-slate-900/80 text-slate-400 flex items-center justify-center font-bold text-sm transition-all peer-checked:bg-orange-900 peer-checked:text-orange-200 peer-checked:border-orange-500 hover:bg-slate-800 shadow-sm">
+                            <i class="fa-solid fa-check mr-2"></i> YA
+                        </div>
+                    </label>
+                    <label class="cursor-pointer relative group">
+                        <input type="radio" name="coffeeOption" value="Tidak" class="peer sr-only" checked onchange="updateSummary()">
+                        <div class="h-10 rounded-lg border border-slate-700 bg-slate-900/80 text-slate-400 flex items-center justify-center font-bold text-sm transition-all peer-checked:bg-slate-700 peer-checked:text-slate-200 peer-checked:border-slate-500 hover:bg-slate-800 shadow-sm">
+                            <i class="fa-solid fa-xmark mr-2"></i> TIDAK
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Voucher (Hidden Default) -->
+            <div id="voucherSection" class="hidden fade-in">
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-ticket text-purple-400"></i> Gunakan Voucher
+                </label>
+                <div class="relative">
+                    <input type="text" id="voucherCode" placeholder="Masukan kode voucher" oninput="updateSummary()"
+                        class="w-full bg-slate-900/80 border border-slate-700 border-dashed rounded-xl px-4 py-3 text-white text-center placeholder-slate-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all tracking-widest uppercase">
+                </div>
+                <p id="voucherMessage" class="text-center text-[10px] mt-1 h-4 font-bold"></p>
+            </div>
+
+            <!-- Metode Pembayaran -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">
+                    Metode Pembayaran
+                </label>
+                <div class="grid grid-cols-3 gap-2">
+                    <!-- Kotak -->
+                    <label class="cursor-pointer relative group">
+                        <input type="radio" name="paymentMethod" value="Kotak (Atas TV)" class="peer sr-only" onchange="toggleQRIS()">
+                        <div class="h-full p-2 bg-slate-900/80 border border-slate-700 rounded-xl text-center hover:bg-slate-800 peer-checked:border-green-500 peer-checked:bg-slate-800/50 transition-all flex flex-col items-center justify-center gap-1">
+                            <i class="fa-solid fa-box-archive text-xl text-yellow-500"></i>
+                            <span class="text-[9px] font-bold uppercase leading-tight">Duwite lebokna kotak</span>
+                        </div>
+                    </label>
+                    
+                    <!-- Kasir -->
+                    <label class="cursor-pointer relative group">
+                        <input type="radio" name="paymentMethod" value="Kasir" class="peer sr-only" onchange="toggleQRIS()">
+                        <div class="h-full p-2 bg-slate-900/80 border border-slate-700 rounded-xl text-center hover:bg-slate-800 peer-checked:border-green-500 peer-checked:bg-slate-800/50 transition-all flex flex-col items-center justify-center gap-1">
+                            <i class="fa-solid fa-user-tie text-xl text-blue-500"></i>
+                            <span class="text-[9px] font-bold uppercase leading-tight">Bayar di Kasir</span>
+                        </div>
+                    </label>
+
+                    <!-- QRIS -->
+                    <label class="cursor-pointer relative group">
+                        <input type="radio" name="paymentMethod" value="QRIS" class="peer sr-only" onchange="toggleQRIS()">
+                        <div class="h-full p-2 bg-slate-900/80 border border-slate-700 rounded-xl text-center hover:bg-slate-800 peer-checked:border-green-500 peer-checked:bg-slate-800/50 transition-all flex flex-col items-center justify-center gap-1">
+                            <i class="fa-solid fa-qrcode text-xl text-white"></i>
+                            <span class="text-[9px] font-bold uppercase leading-tight">Scan QRIS</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tampilan QR Code (Wajib ada file QRIS.jpg di folder yang sama) -->
+            <div id="qrisDisplay" class="hidden fade-in mt-2 bg-white rounded-xl p-4 text-center">
+                <p class="text-black font-bold text-xs mb-2">Scan QRIS untuk Bayar</p>
+                <div class="relative min-h-[150px] flex items-center justify-center">
+                    <!-- Gunakan file QRIS.jpg -->
+                    <img src="QRIS.jpg" 
+                         onerror="this.style.display='none'; document.getElementById('qrisError').classList.remove('hidden');"
+                         alt="QRIS Code" 
+                         class="mx-auto w-full max-w-[200px] h-auto object-contain border border-black rounded-lg">
+                    
+                    <!-- Pesan Error jika gambar tidak ada -->
+                    <div id="qrisError" class="hidden text-red-600 text-[10px] font-bold p-2 bg-red-100 rounded border border-red-400">
+                        <i class="fa-solid fa-triangle-exclamation text-xl mb-1"></i><br>
+                        Gambar tidak ditemukan!<br>
+                        Simpan gambar QRIS anda dengan nama<br>
+                        <span class="bg-yellow-200 px-1 rounded text-black">QRIS.jpg</span><br>
+                        di dalam folder yang sama dengan file ini.
+                    </div>
+                </div>
+                <p class="text-[10px] text-gray-500 mt-2">Tunjukan bukti bayar ke admin</p>
+            </div>
+
+            <!-- Total -->
+            <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-4 border border-slate-700 flex justify-between items-center shadow-lg">
+                <div>
+                    <p class="text-slate-400 text-[10px] uppercase tracking-wider">Total Bayar</p>
+                    <p class="text-green-400 font-bold text-2xl ps-font transition-all" id="totalPrice">Rp 0</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-400 text-[10px] uppercase tracking-wider">Durasi</p>
+                    <p class="text-white font-bold text-lg" id="durationDisplay">0 Jam</p>
+                </div>
+            </div>
+
+            <!-- Tombol -->
+            <button onclick="processPayment()" id="payBtn"
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(37,99,235,0.3)] transform transition hover:-translate-y-1 active:translate-y-0 flex justify-center items-center gap-3 uppercase tracking-wider text-sm">
+                <i class="fa-solid fa-power-off"></i>
+                <span>Nyalakan & Bayar</span>
+            </button>
+        </div>
+
+        <div class="bg-black/80 p-3 text-center text-[10px] text-slate-600 border-t border-slate-800">
+            PlayStation Automation System v13.0
+        </div>
+    </div>
+
+    <!-- MODAL SUCCESS -->
+    <div id="successModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden flex items-center justify-center z-50 p-6">
+        <div class="bg-slate-900 rounded-3xl p-8 max-w-sm w-full text-center border border-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.2)]">
+            <div class="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6 ring-2 ring-blue-500 animate-pulse">
+                <i class="fa-solid fa-gamepad text-4xl text-blue-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2 ps-font">SYSTEM ON</h2>
+            <p class="text-slate-400 text-sm mb-8">Data terkirim ke semua Admin.</p>
+            <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl border border-slate-700 font-bold text-sm">TUTUP</button>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN ADMIN -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex items-center justify-center z-50 p-6">
+        <div class="bg-slate-900 rounded-2xl p-6 max-w-xs w-full border border-slate-700">
+            <h3 class="text-white font-bold mb-4 text-center">Login Admin</h3>
+            <input type="password" id="adminPassword" placeholder="Password (Default: admin123)" class="w-full bg-black border border-slate-600 rounded p-2 text-white mb-4">
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('adminLoginModal').classList.add('hidden')" class="w-1/2 bg-slate-700 text-white p-2 rounded">Batal</button>
+                <button onclick="checkAdminPassword()" class="w-1/2 bg-blue-600 text-white p-2 rounded">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PENGATURAN ADMIN -->
+    <div id="adminSettingsModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden flex items-center justify-center z-50 p-6">
+        <div class="bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-slate-700">
+            <h3 class="text-white font-bold mb-4 text-center border-b border-slate-700 pb-2"><i class="fa-solid fa-gear"></i> Pengaturan Voucher</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-400">Kode Voucher (3 Jam)</label>
+                    <input type="text" id="settingCode" class="w-full bg-black border border-slate-600 rounded p-2 text-white uppercase">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">Harga Paket Voucher (Rp)</label>
+                    <input type="number" id="settingVoucherPrice" class="w-full bg-black border border-slate-600 rounded p-2 text-white">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">Harga Normal Per Jam (Rp)</label>
+                    <input type="number" id="settingNormalPrice" class="w-full bg-black border border-slate-600 rounded p-2 text-white">
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-6">
+                <button onclick="document.getElementById('adminSettingsModal').classList.add('hidden')" class="w-1/2 bg-slate-700 text-white p-2 rounded">Tutup</button>
+                <button onclick="saveAdminSettings()" class="w-1/2 bg-green-600 text-white p-2 rounded">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const DEFAULT_CONFIG = {
+            voucherCode: "BERKAH",
+            voucherPrice: 17000,
+            hourlyPrice: 5000
+        };
+        let config = JSON.parse(localStorage.getItem('ps_config')) || DEFAULT_CONFIG;
+
+        // --- BOT & CHAT ---
+        const BOT_TOKENS = [
+            "8339576140:AAGk7pWtnC964OiIdpBjRuyIQQ0hSZ4RFaU", 
+            "8257877438:AAGxAzuLMt3Op8gXlO-Sa6oZ6UKmymF8AUo", 
+            "8541507726:AAFOXrX14IkNh6R0PMf_FxId4A26Y-NBgAs"
+        ];
+        const CHAT_IDS = ["8498622906", "7933777456", "6845701994"];
+        
+        let selectedDuration = 0;
+        let currentTotal = 0;
+
+        // --- ADMIN ---
+        function openAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+            document.getElementById('adminPassword').value = '';
+        }
+        function checkAdminPassword() {
+            if (document.getElementById('adminPassword').value === 'admin123') {
+                document.getElementById('adminLoginModal').classList.add('hidden');
+                openSettings();
+            } else {
+                alert('Password Salah!');
+            }
+        }
+        function openSettings() {
+            document.getElementById('adminSettingsModal').classList.remove('hidden');
+            document.getElementById('settingCode').value = config.voucherCode;
+            document.getElementById('settingVoucherPrice').value = config.voucherPrice;
+            document.getElementById('settingNormalPrice').value = config.hourlyPrice;
+        }
+        function saveAdminSettings() {
+            config.voucherCode = document.getElementById('settingCode').value.trim().toUpperCase();
+            config.voucherPrice = parseInt(document.getElementById('settingVoucherPrice').value);
+            config.hourlyPrice = parseInt(document.getElementById('settingNormalPrice').value);
+            localStorage.setItem('ps_config', JSON.stringify(config));
+            alert('Pengaturan Disimpan!');
+            document.getElementById('adminSettingsModal').classList.add('hidden');
+            updateSummary();
+        }
+
+        // --- UI ---
+        const hourGrid = document.getElementById('hourGrid');
+        for (let i = 1; i <= 12; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className = `h-10 rounded-lg font-bold text-sm transition-all duration-200 bg-slate-800 text-slate-400 border border-slate-700 hover:bg-green-900 hover:text-green-400`;
+            btn.onclick = () => selectHour(i, btn);
+            hourGrid.appendChild(btn);
+        }
+
+        function selectHour(hours, btnElement) {
+            selectedDuration = hours;
+            const buttons = hourGrid.getElementsByTagName('button');
+            for (let btn of buttons) {
+                btn.className = `h-10 rounded-lg font-bold text-sm transition-all duration-200 bg-slate-800 text-slate-400 border border-slate-700 hover:bg-green-900 hover:text-green-400`;
+            }
+            btnElement.className = `h-10 rounded-lg font-bold text-sm transition-all duration-200 btn-green-active`;
+            
+            // Logic Kopi & Voucher 3 Jam
+            const coffeeSection = document.getElementById('coffeeSection');
+            const voucherSection = document.getElementById('voucherSection');
+            if (hours === 3) {
+                coffeeSection.classList.remove('hidden');
+                voucherSection.classList.remove('hidden');
+            } else {
+                coffeeSection.classList.add('hidden');
+                voucherSection.classList.add('hidden');
+                document.querySelector('input[name="coffeeOption"][value="Tidak"]').checked = true;
+                document.getElementById('voucherCode').value = "";
+                document.getElementById('voucherMessage').textContent = "";
+            }
+            updateSummary();
+        }
+
+        function toggleQRIS() {
+            const qrisRadio = document.querySelector('input[name="paymentMethod"][value="QRIS"]');
+            const qrisDisplay = document.getElementById('qrisDisplay');
+            if (qrisRadio && qrisRadio.checked) {
+                qrisDisplay.classList.remove('hidden');
+            } else {
+                qrisDisplay.classList.add('hidden');
+            }
+        }
+
+        function updateSummary() {
+            let total = selectedDuration * config.hourlyPrice;
+            const inputCode = document.getElementById('voucherCode').value.trim().toUpperCase();
+            const coffeeRadio = document.querySelector('input[name="coffeeOption"]:checked');
+            const coffeeStatus = coffeeRadio ? coffeeRadio.value : "Tidak";
+            const messageEl = document.getElementById('voucherMessage');
+            
+            if (inputCode === config.voucherCode) {
+                if (selectedDuration === 3 && coffeeStatus === "Ya") {
+                    total = config.voucherPrice; 
+                    messageEl.textContent = `Voucher ${config.voucherCode} Aktif: Rp ${formatRupiah(config.voucherPrice)}`;
+                    messageEl.className = "text-center text-[10px] mt-1 h-4 font-bold text-green-400 animate-pulse";
+                } else if (selectedDuration === 3) {
+                    messageEl.textContent = "Voucher perlu 'Karo Kopi: YA'";
+                    messageEl.className = "text-center text-[10px] mt-1 h-4 font-bold text-orange-400";
+                }
+            } else if (inputCode !== "") {
+                messageEl.textContent = "Kode Voucher Tidak Valid";
+                messageEl.className = "text-center text-[10px] mt-1 h-4 font-bold text-red-400";
+            } else {
+                messageEl.textContent = "";
+            }
+
+            currentTotal = total;
+            document.getElementById('totalPrice').textContent = formatRupiah(total);
+            document.getElementById('durationDisplay').textContent = selectedDuration + " Jam";
+        }
+
+        function formatRupiah(angka) {
+            return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        async function processPayment() {
+            const name = document.getElementById('renterName').value;
+            const paymentMethodRadio = document.querySelector('input[name="paymentMethod"]:checked');
+            const coffeeRadio = document.querySelector('input[name="coffeeOption"]:checked');
+            const voucherCode = document.getElementById('voucherCode').value.trim().toUpperCase();
+            const payBtn = document.getElementById('payBtn');
+
+            if (!name) { alert("Mohon isi Nama Perental!"); return; }
+            if (selectedDuration === 0) { alert("Mohon pilih durasi main!"); return; }
+            if (!paymentMethodRadio) { alert("Mohon pilih metode pembayaran!"); return; }
+
+            const paymentMethod = paymentMethodRadio.value;
+            const coffeeStatus = coffeeRadio ? coffeeRadio.value : "Tidak";
+            const voucherStatus = voucherCode ? voucherCode : "-";
+            const totalPriceStr = formatRupiah(currentTotal);
+
+            const originalBtnContent = payBtn.innerHTML;
+            payBtn.innerHTML = `<div class="loader"></div>`;
+            payBtn.disabled = true;
+
+            const message = `
+🔵 *PLAYSTATION SYSTEM ON* 🔵
+---------------------------
+👤 *Player:* ${name}
+⏱ *Durasi:* ${selectedDuration} Jam
+☕ *Karo Kopi:* ${coffeeStatus}
+🎟 *Voucher:* ${voucherStatus}
+💵 *Total:* ${totalPriceStr}
+💳 *Via:* ${paymentMethod}
+📅 *Waktu:* ${new Date().toLocaleString('id-ID')}
+---------------------------
+✅ *Status:* PS Dinyalakan Otomatis.
+            `;
+
+            const promises = [];
+            CHAT_IDS.forEach(chatId => {
+                BOT_TOKENS.forEach(token => {
+                    const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=Markdown`;
+                    promises.push(fetch(url).catch(err => console.log(`Gagal kirim ke ${chatId}`, err)));
+                });
+            });
+
+            try {
+                await Promise.all(promises);
+                document.getElementById('successModal').classList.remove('hidden');
+                resetForm();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('successModal').classList.remove('hidden');
+                resetForm();
+            } finally {
+                payBtn.innerHTML = originalBtnContent;
+                payBtn.disabled = false;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('renterName').value = "";
+            document.getElementById('voucherCode').value = "";
+            document.getElementById('voucherMessage').textContent = "";
+            
+            const buttons = hourGrid.getElementsByTagName('button');
+            for (let btn of buttons) {
+                btn.className = `h-10 rounded-lg font-bold text-sm transition-all duration-200 bg-slate-800 text-slate-400 border border-slate-700 hover:bg-green-900 hover:text-green-400`;
+            }
+            
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(el => el.checked = false);
+            
+            const coffeeNo = document.querySelector('input[name="coffeeOption"][value="Tidak"]');
+            if(coffeeNo) coffeeNo.checked = true;
+            document.getElementById('coffeeSection').classList.add('hidden'); 
+            document.getElementById('voucherSection').classList.add('hidden'); 
+            document.getElementById('qrisDisplay').classList.add('hidden');
+            
+            selectedDuration = 0;
+            currentTotal = 0;
+            updateSummary();
+        }
+    </script>
+</body>
+</html>
